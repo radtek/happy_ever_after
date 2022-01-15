@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+python/execrise/plane_wars/venv/
+python/execrise/test.py
+__pycache__/
+*/.idea/

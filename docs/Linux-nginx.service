@@ -1,0 +1,15 @@
+[Unit]
+Description=Nginx Service
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+ExecStartPre=/usr/local/nginx-1.20.0/sbin/nginx -t
+ExecStart=/usr/local/nginx-1.20.0/sbin/nginx
+ExecReload=/usr/local/nginx-1.20.0/sbin/nginx -s reload
+ExecStop=/usr/local/nginx-1.20.0/sbin/nginx -s quit
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

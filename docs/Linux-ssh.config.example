@@ -1,0 +1,128 @@
+PubkeyAcceptedKeyTypes +ssh-rsa
+
+# Red Hat Enterprise Linux 5.11,6.4,7.9,8.3
+Host rhel511
+    HostName 192.168.1.51
+    User root
+    Port 22
+    KexAlgorithms diffie-hellman-group1-sha1
+
+Host rhel64
+    HostName 192.168.1.61
+    User root
+    Port 22
+    
+Host rhel64-kpa-01
+    HostName 192.168.1.62
+    User root
+    Port 22
+    
+Host rhel64-kpa-02
+    HostName 192.168.1.63
+    User root
+    Port 22
+    
+Host rhel79
+    HostName 192.168.1.71
+    User root
+    Port 22
+
+Host rhel79-lvm
+    HostName 192.168.1.73
+    User root
+    Port 22
+
+Host rhel79-raid1
+    HostName 192.168.1.74
+    User root
+    Port 22
+    
+Host rhel83
+    HostName 192.168.1.81
+    User root
+    Port 22
+
+Host rhel83-ha-01
+    HostName 192.168.1.82
+    User root
+    Port 22
+
+Host rhel83-ha-02
+    HostName 192.168.1.83
+    User root
+    Port 22
+
+Host rhel79-nginx-01
+    HostName 192.168.1.201
+    User root
+    Port 22
+
+Host rhel79-nginx-02
+    HostName 192.168.1.202
+    User root
+    Port 22
+
+Host rhel79-weops-01
+    HostName 192.168.1.203
+    User root
+    Port 22
+
+Host rhel79-weops-02
+    HostName 192.168.1.204
+    User root
+    Port 22
+
+Host rhel79-weops-03
+    HostName 192.168.1.205
+    User root
+    Port 22
+    
+# SuSE Linux Enterprise 11sp3,12sp5,15sp2
+Host sles11sp3
+    HostName 192.168.1.111
+    User root
+    Port 22
+    Ciphers aes128-ctr
+    
+Host sles12sp5
+    HostName 192.168.1.121
+    User root
+    Port 22
+    
+Host sles15sp2
+    HostName 192.168.1.151
+    User root
+    Port 22
+    
+# BigCloud Linux 6.8,7.6
+Host bclinux68
+    HostName 192.168.1.62
+    User root
+    Port 22
+    
+Host bclinux76
+    HostName 192.168.1.72
+    User root
+    Port 22
+
+# Ubuntu LTS 14.04,16.04,18.04,20.04
+Host ubuntu1404-6
+    HostName 192.168.1.141
+    User qwer
+    Port 22
+
+Host ubuntu1604-7
+    HostName 192.168.1.161
+    User qwer
+    Port 22
+
+Host ubuntu1804-5
+    HostName 192.168.1.181
+    User qwer
+    Port 22
+
+Host ubuntu2004-1
+    HostName 192.168.1.241
+    User qwer
+    Port 22
+

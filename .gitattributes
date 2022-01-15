@@ -1,0 +1,14 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+*.sh   eof=lf
+*.pl   eof=lf
+*.bash eof=lf
+*.py   eof=lf
+*.md   eof=lf
+*.cpp  eof=lf
+*.java eof=lf
+*.go   eof=lf
+*.service eof=lf
+*.cfg  eof=lf
+*.conf eof=lf
