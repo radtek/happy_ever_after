@@ -26,6 +26,7 @@
 | `size`            | I/O 测试的寻址空: 不指定的时候, 会全盘测试; 如果是文件测试, 不指定大小则会报错 | 100G |
 | `filename`        | 测试对象, 即待测试的磁盘设备名称。 | /dev/sdb |
 | `thread` | 默认使用fork创建job, 指定thread后使用`pthread_create`创建(POSIX Threads' function) | |
+| `percentage_random` | 指定随机读/写的占比 | 100,0 |
 
 
 ### 裸盘iops测试
@@ -70,6 +71,13 @@ fio --numjobs=16 -bs=4k -ioengine=libaio -iodepth=1 -direct=1 -rw=randwrite -tim
 fio --numjobs=16 -bs=4k -ioengine=libaio -iodepth=1 -direct=1 -rw=randread -time_based -runtime=300  -refill_buffers -norandommap -randrepeat=0 -group_reporting -name=fio-randread-lat -filename=/dev/vdb
 ```
 
+### 非裸盘测试--指定文件大小和文件名
+
+```sh
+-size=10G -filename=/file/path
+
+```
+
 ### 关于 `iodepth`
 
 ![iodepth](./Pictures/iodepth.jpeg)
@@ -81,7 +89,7 @@ AHCI与NVMe两种接口之间的对比表明:
 
 所以使用SATA/SAS接口的硬盘, 测试硬盘性能时, 队列深度建议最大设为32, 再高, 只会降低测试的性能值；若使用NVMe硬盘, 深度可以适当的增加, 这取决于硬盘本身的性能。
 
-fio -ioengine=psync -bs=32k -fdatasync=1 -thread -rw=randrw -percentage_random=100,0 -size=10G -filename=fio_randread_write_test.txt -name='fio mixed randread and sequential write test' -iodepth=4 -runtime=60 -numjobs=4 -group_reporting 
+fio -ioengine=psync -bs=32k -fdatasync=1 -thread -rw=randrw  -size=10G -filename=fio_randread_write_test.txt -name='fio mixed randread and sequential write test' -iodepth=4 -runtime=60 -numjobs=4 -group_reporting 
 
 
 ## dd

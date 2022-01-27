@@ -1,5 +1,17 @@
 ## ssh端口转发
 
+```sh
+ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface] [-b bind_address] [-c cipher_spec] [-D [bind_address:]port] [-E log_file] [-e escape_char] [-F configfile]
+         [-I pkcs11] [-i identity_file] [-J destination] [-L address] [-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port] [-Q query_option] [-R address]
+         [-S ctl_path] [-W host:port] [-w local_tun[:remote_tun]] destination [command]
+# -f ssh在执行命令前退至后台(后台启用)
+# -N 不打开远程shell, 处于等待状态, 用于转发端口（不加-N则直接登录进去）
+# -g 允许远端主机连接本地的转发端口 (支持多主机访问本地侦听端口)
+# -L 将本地主机的地址和端口接收到的数据通过安全通道转发给远程主机的地址和端口
+# -R 将远程主机上的地址和端口接收的数据通过安全通道转发给本地主机的地址和端口
+# -D 动态转发
+```
+
 **1. 本地端口转发**
 
 接收本地端口(Local Port)数据, 转发到远程端口(Remote Port)
@@ -7,13 +19,9 @@
 
 ```sh
 ssh -L [Local IP:]<Local Port>:<Remote IP>:<Remote Port> [User@]<Remote IP>
-
-# -f 后台启用
-# -N 不打开远程shell，处于等待状态（不加-N则直接登录进去）
-# -g 启用网关功能
 ```
 
-例1: `ServerA =22=> ServerB`
+例1: `ServerA:8080 =22=> ServerB:127.0.0.1:80`
 
 * ServerB只允许本地127.0.0.1访问nginx的80端口
 * ServerA可以连接ServerB的22端口
@@ -23,7 +31,7 @@ ssh -L [Local IP:]<Local Port>:<Remote IP>:<Remote Port> [User@]<Remote IP>
 ServerA> ssh -Nf -L 0.0.0.0:8080:127.0.0.1:80 User@ServerB-IP
 ```
 
-例2: `ServerA =22=> ServerB =22=> ServerC`
+例2: `ServerA:8022 =22=> ServerB:22 =22=> ServerC:22`
 
 * ServerA可以访问ServerB的22端口, 而与ServerC网络隔离;
 * ServerB可以访问ServerC的22端口;
@@ -40,10 +48,6 @@ ServerA> ssh -Nf -L 127.0.0.1:8022:<ServerC-IP>:80 User@ServerB-IP
 
 ```sh
 ssh -L [Remote IP:]<Remote Port>:<Server IP>:<Server Port> [User@]<Remote IP>
-
-# -f 后台启用
-# -N 不打开远程shell，处于等待状态（不加-N则直接登录进去）
-# -g 启用网关功能
 ```
 
 例23: `ServerA <=22,6666= ServerB =7777=> ServerC`
