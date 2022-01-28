@@ -99,6 +99,7 @@ arm: 华为泰山
 
 init=/bin/bash console=tty1
 mount -o remount,rw /sysroot
+# mount -o remount,rw /
 chroot /sysroot
 reboot
 ```
