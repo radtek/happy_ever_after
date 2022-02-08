@@ -102,6 +102,146 @@ bash-4.2.46-31.el7.x86_64
 | `%pretrans` | Scriptlet that is executed just before installing or removing *any package*. |
 | `%posttrans` | Scriptlet that is executed at the end of the transaction. |
 
+* macros
+
+> Refer to: [RPM-macros](./Linux-rpm-macros.md)
+
+* `e.g.` An example SPEC file for the bello program written in bash
+
+    ```spec
+    Name:           bello
+    Version:        0.1
+    Release:        1%{?dist}
+    Summary:        Hello World example implemented in bash script
+
+    License:        GPLv3+
+    URL:            https://www.example.com/%{name}
+    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+
+    Requires:       bash
+
+    BuildArch:      noarch
+
+    %description
+    The long-tail description for our Hello World Example implemented in
+    bash script.
+
+    %prep
+    %setup -q
+
+    %build
+
+    %install
+
+    mkdir -p %{buildroot}/%{_bindir}
+
+    install -m 0755 %{name} %{buildroot}/%{_bindir}/%{name}
+
+    %files
+    %license LICENSE
+    %{_bindir}/%{name}
+
+    %changelog
+    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1-1
+    - First bello package
+    - Example second item in the changelog for version-release 0.1-1
+    ```
+
+* `e.g.` An example SPEC file for the pello program written in Python
+
+    ```spec
+    Name:           pello
+    Version:        0.1.1
+    Release:        1%{?dist}
+    Summary:        Hello World example implemented in Python
+
+    License:        GPLv3+
+    URL:            https://www.example.com/%{name}
+    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+
+    BuildRequires:  python
+    Requires:       python
+    Requires:       bash
+
+    BuildArch:      noarch
+
+    %description
+    The long-tail description for our Hello World Example implemented in Python.
+
+    %prep
+    %setup -q
+
+    %build
+
+    python -m compileall %{name}.py
+
+    %install
+
+    mkdir -p %{buildroot}/%{_bindir}
+    mkdir -p %{buildroot}/usr/lib/%{name}
+
+    cat > %{buildroot}/%{_bindir}/%{name} <←EOF
+    #!/bin/bash
+    /usr/bin/python /usr/lib/%{name}/%{name}.pyc
+    EOF
+
+    chmod 0755 %{buildroot}/%{_bindir}/%{name}
+
+    install -m 0644 %{name}.py* %{buildroot}/usr/lib/%{name}/
+
+    %files
+    %license LICENSE
+    %dir /usr/lib/%{name}/
+    %{_bindir}/%{name}
+    /usr/lib/%{name}/%{name}.py*
+
+    %changelog
+    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1.1-1
+    - First pello package
+    ```
+
+* `e.g.` An example SPEC file for the cello program written in C
+
+    ```spec
+    Name:           cello
+    Version:        1.0
+    Release:        1%{?dist}
+    Summary:        Hello World example implemented in C
+
+    License:        GPLv3+
+    URL:            https://www.example.com/%{name}
+    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+
+    Patch0:         cello-output-first-patch.patch
+
+    BuildRequires:  gcc
+    BuildRequires:  make
+
+    %description
+    The long-tail description for our Hello World Example implemented in
+    C.
+
+    %prep
+    %setup -q
+
+    %patch0
+
+    %build
+    make %{?_smp_mflags}
+
+    %install
+    %make_install
+
+    %files
+    %license LICENSE
+    %{_bindir}/%{name}
+
+    %changelog
+    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 1.0-1
+    - First cello package
+    ```
+
+
 
 ```spec
 Name:
