@@ -8,9 +8,45 @@ RPM provides a rich set of macros to make package maintenance simpler and consis
 ~]$ rpm --eval "some text printed on %{_arch}"
 some text printed on x86_64
 
-~]$ rpm --define "test Hello, World!" --eval "%{test}"
+~]$ rpm --define 'test Hello, World!' --eval "%{test}"
 Hello, World!
 ```
+
+宏定义相关的文件(共两类): 
+
+* 1.直接定义类
+
+    ```sh
+    # 优先级顺序如下
+    1. 当前文件中定义: 如spec文件中 %define dist .centos
+    2. 命令中定义: rpm --define "_arch my_arch" --eval "%{_arch}"
+    3. 用户自定义相关:  ~/.rpmmacros
+    4. 系统相关的配置:  /etc/rpm/
+    5. 全局扩展配置:   /usr/lib/rpm/macros.d/*
+    6. 全局的配置:     /usr/lib/rpm/macros, /usr/lib/rpm/redhat/macros
+    ```
+
+* 2.通过macrofiles引用类
+
+    ```sh
+    /usr/lib/rpm/rpmrc
+    /usr/lib/rpm/redhat/rpmrc
+    /etc/rpmrc
+    ~/.rpmrc
+
+    # rpmrc主要是用来定义一些跟平台特型相关的一些选项: 如optflags引用的是"i686" ，则optflags的值就是: "-O2 -g -march=i686"
+    optflags: i386 -O2 -g -march=i386 -mtune=i686
+    optflags: i686 -O2 -g -march=i686
+    ```
+
+定义macrofiles:
+
+> 注: 需要在编译阶段定义 `MACROFILES`，否则会加载默认的路径
+
+```sh
+macrofiles: /usr/lib/rpm/macros:/etc/rpm/macros
+```
+
 
 ## Macros for paths set and used by build systems
 
@@ -91,4 +127,112 @@ The value of the `LDFLAGS` environment variable set by build systems is determin
 ```sh
 ~]$ rpm -E "%{build_ldflags}"
 -Wl,-z,relro  -Wl,-z,now -specs=/usr/lib/rpm/redhat/redhat-hardened-ld
+```
+
+## 宏定义与修改
+
+* spec文件里面定义:
+
+    ```spec
+    %define macro_name value
+    %define macro_name %(data)
+    ```
+
+* spec文件中使用方法:
+
+    ```spec
+    %macro_name
+    %macro_name 1 2 3 # 1，2，3为参数传递给宏
+    %0                # 宏名字
+    %*                # 传递给宏的所有参数
+    %#                # 传递给宏的参数个数
+    %1                # 参数1
+    %2                # 参数2
+    ```
+
+* 命令行使用 `--define`
+ 
+    ```sh
+    rpm --define "dist my_dist" --eval "%{dist}"
+    rpmbuild -bs name.spec --define "dist x86_64"
+    ```
+
+## 宏语法
+
+> [https://rpm-software-management.github.io/rpm/manual/macros.html](https://rpm-software-management.github.io/rpm/manual/macros.html)
+
+* Defining a Macro
+
+    ```spec
+    %define <name>[(opts)] <body>
+    ```
+
+    * All whitespace surrounding `<body>` is removed.
+    * Name may be composed of alphanumeric(`0-9,a-z,A-Z`) characters, and the character "`_`" and must be **at least 3 characters** in length.
+    * A macro without an (opts) field is "simple" in that only recursive macro expansion is performed. A parameterized macro contains an (opts) field. "–" as opts disables all option processing, otherwise the opts (i.e. string between parentheses) are passed exactly as is to `getopt(3)` for argc/argv processing at the beginning of a macro invocation. 
+    * "–" can be used to separate options from arguments. While a parameterized macro is being expanded, the following shell-like macros are available:
+
+        ```spec
+        %0       the name of the macro being invoked
+        %*       all arguments (unlike shell, not including any processed flags)
+        %#       the number of arguments
+        %{-f}    if present at invocation, the flag f itself
+        %{-f*}   if present at invocation, the argument to flag f
+        %1, %2   the arguments themselves (after getopt(3) processing)
+        ```
+
+    * Within the body of a macro, there are several constructs that permit testing for the presence of optional parameters. 
+
+        * The simplest construct is "`%{-f}`" which expands (literally) to "`-f`" if `-f` was mentioned when the macro was invoked. 
+        * There are also provisions for including text if flag was present using "`%{-f:X}`". This macro expands to (the expansion of) `X` if the flag was present. 
+        * The negative form, "`%{!-f:Y}`", expanding to (the expansion of) `Y` if `-f` was not present, is also supported.
+        * In addition to the "`%{…}`" form, shell expansion can be performed using "`%(shell command)`".
+
+* Builtin Macros
+
+There are several builtin macros (with reserved names) that are needed to perform useful operations. The current list is:
+
+```sh
+    %trace          toggle print of debugging information before/after expansion
+    %dump           print the active (i.e. non-covered) macro table
+    %getncpus       return the number of CPUs
+    %getconfdir     expand to rpm "home" directory (typically /usr/lib/rpm)
+    %dnl            discard to next line (without expanding)
+    %verbose        expand to 1 if rpm is in verbose mode, 0 if not
+    %{verbose:...}  expand to ... if rpm is in verbose mode, the empty string if not
+
+    %{echo:...}    print ... to stdout
+    %{warn:...}    print warning: ... to stderr
+    %{error:...}    print error: ... to stderr and return an error
+ 
+    %define ...    define a macro
+    %undefine ...  undefine a macro
+    %global ...    define a macro whose body is available in global context
+
+    %{macrobody:...}    literal body of a macro
+
+    %{basename:...}   basename(1) macro analogue
+    %{dirname:...}    dirname(1) macro analogue
+    %{exists:...}     test file existence, expands to 1/0
+    %{suffix:...}     expand to suffix part of a file name
+    %{url2path:...}   convert url to a local path
+    %{getenv:...}     getenv(3) macro analogue
+    %{uncompress:...} expand ... to <file> and test to see if <file> is compressed. The expansion is
+                cat <file>        # if not compressed
+                gzip -dc <file>   # if gzip'ed
+                bzip2 -dc <file>  # if bzip'ed
+
+                e.g. ~]$ rpm --eval "%{uncompress:pello-0.1.1.tar.gz}"
+                     /usr/bin/gzip -dc pello-0.1.1.tar.gz
+
+    %{load:...}      load a macro file
+    %{lua:...}       expand using the [embedded Lua interpreter](/rpm/manual/lua.html)
+    %{expand:...}    like eval, expand ... to <body> and (re-)expand <body>
+    %{expr:...}      evaluate an expression
+    %{shescape:...}  single quote with escapes for use in shell
+    %{shrink:...}    trim leading and trailing whitespace, reduce intermediate whitespace to a single space
+    %{quote:...}     quote a parametric macro argument, needed to pass empty strings or strings with whitespace
+
+    %{S:...}   expand ... to <source> file name
+    %{P:...}   expand ... to <patch> file name
 ```

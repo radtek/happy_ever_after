@@ -40,9 +40,26 @@
 
 ### 2.1 SPEC文件
 
-SPEC文件主体由两部分组成: + Body
+SPEC文件主体由两部分组成: Preamble + Body
+
 *  Preamble(前言): The *Preamble* part contains a series of **metadata items** that are used in the Body part.
+
 *  Body: The *Body* part represents the main part of the instructions.
+
+生成SPEC文件:
+
+* 手动创建
+
+* 使用`.srpm`中包含的`.spec`文件
+
+* 使用tarbal包中包含的`.spec`文件
+
+* 使用 `rpmdev-newspec`
+
+    ```sh
+    ~]$ rpmdev-newspec cello
+    cello.spec created; type minimal, rpm version >= 4.11.
+    ```
 
 #### Preamble Items
 
@@ -108,197 +125,202 @@ bash-4.2.46-31.el7.x86_64
 
 * `e.g.` An example SPEC file for the bello program written in bash
 
-    ```spec
-    Name:           bello
-    Version:        0.1
-    Release:        1%{?dist}
-    Summary:        Hello World example implemented in bash script
+    * file: `bello`, `LICENSE`
 
-    License:        GPLv3+
-    URL:            https://www.example.com/%{name}
-    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+        ```sh
+        #!/bin/bash
 
-    Requires:       bash
+        printf "Hello World\n"
+        ```
+    * Package: `bello-0.1.tar.gz`
 
-    BuildArch:      noarch
+    * spec file
 
-    %description
-    The long-tail description for our Hello World Example implemented in
-    bash script.
+        ```spec
+        Name:           bello
+        Version:        0.1
+        Release:        1%{?dist}
+        Summary:        Hello World example implemented in bash script
 
-    %prep
-    %setup -q
+        License:        GPLv3+
+        URL:            https://www.example.com/%{name}
+        Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
 
-    %build
+        Requires:       bash
 
-    %install
+        BuildArch:      noarch
 
-    mkdir -p %{buildroot}/%{_bindir}
+        %description
+        The long-tail description for our Hello World Example implemented in
+        bash script.
 
-    install -m 0755 %{name} %{buildroot}/%{_bindir}/%{name}
+        %prep
+        %setup -q
 
-    %files
-    %license LICENSE
-    %{_bindir}/%{name}
+        %build
 
-    %changelog
-    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1-1
-    - First bello package
-    - Example second item in the changelog for version-release 0.1-1
-    ```
+        %install
+
+        mkdir -p %{buildroot}/%{_bindir}
+
+        install -m 0755 %{name} %{buildroot}/%{_bindir}/%{name}
+
+        %files
+        %license LICENSE
+        %{_bindir}/%{name}
+
+        %changelog
+        * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1-1
+        - First bello package
+        - Example second item in the changelog for version-release 0.1-1
+        ```
 
 * `e.g.` An example SPEC file for the pello program written in Python
 
-    ```spec
-    Name:           pello
-    Version:        0.1.1
-    Release:        1%{?dist}
-    Summary:        Hello World example implemented in Python
+    * file: `pello.py`, `LICENSE`
 
-    License:        GPLv3+
-    URL:            https://www.example.com/%{name}
-    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+        ```python
+        #!/usr/bin/python3
 
-    BuildRequires:  python
-    Requires:       python
-    Requires:       bash
+        print("Hello World")
+        ```
 
-    BuildArch:      noarch
+    * Package: `pello-0.1.1.tar.gz`
 
-    %description
-    The long-tail description for our Hello World Example implemented in Python.
+    * spec file
 
-    %prep
-    %setup -q
+        ```spec
+        Name:           pello
+        Version:        0.1.1
+        Release:        1%{?dist}
+        Summary:        Hello World example implemented in Python
 
-    %build
+        License:        GPLv3+
+        URL:            https://www.example.com/%{name}
+        Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
 
-    python -m compileall %{name}.py
+        BuildRequires:  python
+        Requires:       python
+        Requires:       bash
 
-    %install
+        BuildArch:      noarch
 
-    mkdir -p %{buildroot}/%{_bindir}
-    mkdir -p %{buildroot}/usr/lib/%{name}
+        %description
+        The long-tail description for our Hello World Example implemented in Python.
 
-    cat > %{buildroot}/%{_bindir}/%{name} <←EOF
-    #!/bin/bash
-    /usr/bin/python /usr/lib/%{name}/%{name}.pyc
-    EOF
+        %prep
+        %setup -q
 
-    chmod 0755 %{buildroot}/%{_bindir}/%{name}
+        %build
 
-    install -m 0644 %{name}.py* %{buildroot}/usr/lib/%{name}/
+        python -m compileall %{name}.py
 
-    %files
-    %license LICENSE
-    %dir /usr/lib/%{name}/
-    %{_bindir}/%{name}
-    /usr/lib/%{name}/%{name}.py*
+        %install
 
-    %changelog
-    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1.1-1
-    - First pello package
-    ```
+        mkdir -p %{buildroot}/%{_bindir}
+        mkdir -p %{buildroot}/usr/lib/%{name}
+
+        cat > %{buildroot}/%{_bindir}/%{name} <<EOF
+        #!/bin/bash
+        /usr/bin/python /usr/lib/%{name}/%{name}.pyc
+        EOF
+
+        chmod 0755 %{buildroot}/%{_bindir}/%{name}
+
+        install -m 0644 %{name}.py* %{buildroot}/usr/lib/%{name}/
+
+        %files
+        %license LICENSE
+        %dir /usr/lib/%{name}/
+        %{_bindir}/%{name}
+        /usr/lib/%{name}/%{name}.py*
+
+        %changelog
+        * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 0.1.1-1
+        - First pello package
+        ```
 
 * `e.g.` An example SPEC file for the cello program written in C
 
-    ```spec
-    Name:           cello
-    Version:        1.0
-    Release:        1%{?dist}
-    Summary:        Hello World example implemented in C
+    * file: `cello.c`, `LICENSE`, `Makefile`
 
-    License:        GPLv3+
-    URL:            https://www.example.com/%{name}
-    Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
+        ```c
+        #include <stdio.h>
 
-    Patch0:         cello-output-first-patch.patch
+        int main(void) {
+            printf("Hello World\n");
+            return 0;
+        }
+        ```
 
-    BuildRequires:  gcc
-    BuildRequires:  make
+        ```makefile
+        cello:
+        	gcc -g -o cello cello.c
+        
+        clean:
+        	rm cello
+        
+        install:
+        	mkdir -p $(DESTDIR)/usr/bin
+        	install -m 0755 cello $(DESTDIR)/usr/bin/cello
+        ```
 
-    %description
-    The long-tail description for our Hello World Example implemented in
-    C.
+    * patch: `cello-output-first-patch.patch`
 
-    %prep
-    %setup -q
+        ```patch
+        --- cello.c.orgi        2022-02-09 09:04:56.986000000 +0800
+        +++ cello.c     2022-02-09 09:05:40.672000000 +0800
+        @@ -1,6 +1,6 @@
+         #include <stdio.h>
+         
+         int main(void) {
+        -    printf("Hello World\n");
+        +    printf("Hello World from kvm_centos_7.6\n");
+             return 0;
+         }
+        ```
 
-    %patch0
+    * package: `cello-1.0.tar.gz`
 
-    %build
-    make %{?_smp_mflags}
+    * spec file:
 
-    %install
-    %make_install
+        ```spec
+        Name:           cello
+        Version:        1.0
+        Release:        1%{?dist}
+        Summary:        Hello World example implemented in C
 
-    %files
-    %license LICENSE
-    %{_bindir}/%{name}
+        License:        GPLv3+
+        URL:            https://www.example.com/%{name}
+        Source0:        https://www.example.com/%{name}/releases/%{name}-%{version}.tar.gz
 
-    %changelog
-    * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 1.0-1
-    - First cello package
-    ```
+        Patch0:         cello-output-first-patch.patch
 
+        BuildRequires:  gcc
+        BuildRequires:  make
 
+        %description
+        The long-tail description for our Hello World Example implemented in C.
 
-```spec
-Name:
-Version:
-Release:        1%{?dist}
-Summary:
+        %prep
+        %setup -q
 
-Group:
-License:
-URL:
-Source0:
+        %patch0
 
-BuildRequires:
-Requires:
+        %build
+        make %{?_smp_mflags}
 
-%description
+        %install
+        %make_install
 
+        %files
+        %license LICENSE
+        %{_bindir}/%{name}
 
-%prep
-%setup -q
-
-
-%build
-%configure
-make %{?_smp_mflags}
-
-
-%install
-%make_install
-
-
-%files
-%doc
-
-
-
-%changelog
-```
-
-```sh
-%description: 软件的详细说明
-%define:      预定义的变量, 例如定义日志路径: _logpath /var/log/weblog
-%prep:        预备参数, 通常为 %setup -q
-%build:       编译参数 ./configure --user=nginx --group=nginx --prefix=/usr/local/nginx/……
-%install:     安装步骤,此时需要指定安装路径, 创建编译时自动生成目录, 复制配置文件至所对应的目录中（这一步比较重要！）
-%pre:         安装前需要做的任务, 如：创建用户
-%post:        安装后需要做的任务 如：自动启动的任务
-%preun:       卸载前需要做的任务 如：停止任务
-%postun:      卸载后需要做的任务 如：删除用户, 删除/备份业务数据
-%clean:       清除上次编译生成的临时文件, 就是上文提到的虚拟目录
-%files:       设置文件属性, 包含编译文件需要生成的目录、文件以及分配所对应的权限
-%changelog:   修改历史
-```
-
-
-
-
+        %changelog
+        * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 1.0-1
+        - First cello package
+        ```
 
 
 
@@ -339,11 +361,3 @@ make %{?_smp_mflags}
     -session   optional     pam_reauthorize.so prepare
     ```
 
-chmod 600 /etc/ssh/ssh_host_*_key
-sed -i -e 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-sed -i -e 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
-sed -i -e 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g'       /etc/ssh/sshd_config
-sed -i -e 's/#UsePAM no/UsePAM yes/g'                                  /etc/ssh/sshd_config
-# sed -i -e 's/#X11Forwarding no/X11Forwarding yes/g'                    /etc/ssh/sshd_config
-sed -i -e '/KexAlgorithms/d'                                           /etc/ssh/sshd_config
-sed -i -e '$a \KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha1,diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,sntrup761x25519-sha512@openssh.com'                 /etc/ssh/sshd_config
