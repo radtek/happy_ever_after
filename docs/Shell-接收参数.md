@@ -1,4 +1,4 @@
-## 接受参数
+## 接收参数
 
 ```sh
 while getopts "t:a:u:h" opt

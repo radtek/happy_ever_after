@@ -119,7 +119,7 @@ bash-4.2.46-31.el7.x86_64
 | `%pretrans` | Scriptlet that is executed just before installing or removing *any package*. |
 | `%posttrans` | Scriptlet that is executed at the end of the transaction. |
 
-* macros
+* Macros
 
 > Refer to: [RPM-macros](./Linux-rpm-macros.md)
 
@@ -321,6 +321,42 @@ bash-4.2.46-31.el7.x86_64
         * Tue May 31 2016 Adam Miller <maxamillion@fedoraproject.org> - 1.0-1
         - First cello package
         ```
+
+### 2.2 File
+
+* 将源码包(`LICENSE`文件也在源码包中)和补丁包放入 `rpmbuild/SOURCE`
+
+* 将 `.spec` 文件放入 `rpmbuild/SPEC`
+
+## 3. Building
+
+* Building source RPMs
+
+    ```sh
+    cd ~/rpmbuild/SPECS/
+    rpmbuild -bs SPECFILE
+    ```
+
+* Building binary RPMs
+
+    * Rebuilding a binary RPM from a source RPM(SRPM)
+
+        ```sh
+        rpmbuild --rebuild ~/rpmbuild/SRPMS/bello-0.1-1.el8.src.rpm
+        ```
+
+    * Building a binary RPM from the SPEC file
+
+        ```sh
+        rpmbuild -bb SPECFILE
+        ```
+
+    * Building RPMs from source RPMs<sup>创建出多个rpms</sup>
+
+        man page: rpmbuild(8), 实际没有过多信息, 此处待补充
+
+
+
 
 
 
