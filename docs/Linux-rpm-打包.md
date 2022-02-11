@@ -348,15 +348,176 @@ bash-4.2.46-31.el7.x86_64
     * Building a binary RPM from the SPEC file
 
         ```sh
-        rpmbuild -bb SPECFILE
+        rpmbuild -bb <SPECFILE>
         ```
 
     * Building RPMs from source RPMs<sup>创建出多个rpms</sup>
 
         man page: rpmbuild(8), 实际没有过多信息, 此处待补充
 
+* Building RPMs and SRPMS
 
+    ```sh
+    rpmbuild -ba <SPECFILE>
+    ```
 
+* Checking RPMs for sanity
+
+    使用 `rpmlint`, 可以对 `.rpm`, `.srpm`包和`.spec`文件进行完整性检查, 加上 `-i` 选项可显示错误简介
+
+    `rpmlint` 判断比较严格, 根据实际情况可以忽略掉一些提示错误
+
+    ```sh
+    ~/rpmbuild/RPMS]$ rpmlint x86_64/cello-1.0-1.el7.x86_64.rpm 
+    cello.x86_64: W: invalid-url URL: https://www.example.com/cello <urlopen error [Errno -2] Name or service not known>
+    cello.x86_64: W: no-documentation
+    cello.x86_64: W: no-manual-page-for-binary cello
+    1 packages and 0 specfiles checked; 0 errors, 3 warnings.
+    
+    ~/rpmbuild/RPMS]$ rpmlint -i x86_64/cello-1.0-1.el7.x86_64.rpm 
+    cello.x86_64: W: invalid-url URL: https://www.example.com/cello <urlopen error [Errno -2] Name or service not known>
+    The value should be a valid, public HTTP, HTTPS, or FTP URL.
+
+    cello.x86_64: W: no-documentation
+    The package contains no documentation (README, doc, etc). You have to include
+    documentation files.
+
+    cello.x86_64: W: no-manual-page-for-binary cello
+    Each executable in standard binary directories should have a man page.
+
+    1 packages and 0 specfiles checked; 0 errors, 3 warnings.
+    ```
+
+## 4. Signing Packages
+
+* 1.**Generate** a gpg
+
+    ```sh
+    ]$ gpg --gen-key
+
+    gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    
+    Please select what kind of key you want:
+       (1) RSA and RSA (default)
+       (2) DSA and Elgamal
+       (3) DSA (sign only)
+       (4) RSA (sign only)
+    Your selection? 1                                     # <= 1
+    RSA keys may be between 1024 and 4096 bits long.
+    What keysize do you want? (2048) 
+    Requested keysize is 2048 bits
+    Please specify how long the key should be valid.
+             0 = key does not expire
+          <n>  = key expires in n days
+          <n>w = key expires in n weeks
+          <n>m = key expires in n months
+          <n>y = key expires in n years
+    Key is valid for? (0) 0                                # <= 0
+    Key does not expire at all
+    Is this correct? (y/N) y                               # <= y
+    
+    GnuPG needs to construct a user ID to identify your key.
+    
+    Real name: Essence, Inc.                               # <= Essence, Inc.
+    Email address: chenwen1@essence.com.cn                 # <= chenwen1@essence.com.cn
+    Comment: Essence, Inc. @ XiTongPingTaiShi Signing Keys # <= Essence, Inc. @ XiTongPingTaiShi Signing Keys
+    You selected this USER-ID:
+        "Essence, Inc. (Essence, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@essence.com.cn>"
+    
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O  # <= O
+    You need a Passphrase to protect your secret key.      # <= password
+    ....
+    gpg: key F426ACE9 marked as ultimately trusted         # Key ID.
+    public and secret key created and signed.              # Successfully.
+    ...                                                    # Information of new GPG.
+    pub   2048R/F426ACE9 2022-02-11
+        Key fingerprint = C823 C1F1 3C69 F688 73A1  9895 8E15 0099 F426 ACE9
+    uid                  Essence, Inc. (Essence, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@essence.com.cn>
+    sub   2048R/1970529B 2022-02-11
+    ```
+
+* **Export** the Public key and <sup>Optional</sup>secrect Key.  
+
+    > 注: 如果只是在本机上给rpm包签名, 无需导入公钥和私钥; 导出的公钥和私钥只是为了后续方便在其他服务器上使用
+
+    * Public Key
+    
+        ```sh
+        # 查询
+        gpg -k
+        gpg --list-keys
+        gpg --list-public-keys
+        
+        # 导出
+        gpg -a "<Key-Name|Key-ID>" --export > RPM-GPG-KEY-<NAME>     # "-a"="--armor", 以ASCII而不是默认的二进制的形式输出; "-o"="--output" 
+        gpg -a -o "<Output-File-Name>" --export "<Key-Name|Key-ID>"  # 只有一个gpg时, "<Key-Name|Key-ID>" 可省略不写
+
+        # e.g.
+        gpg -a "Essence, Inc." --export > RPM-GPG-KEY-Essence
+        ```
+
+    * Secrect Key
+
+        ```sh
+        # 查看
+        gpg -K
+        gpg --list-secret-keys
+        
+        # 导出
+        gpg --export 
+        ```
+
+* **Import** the exported public key into `rpm` database as follows: 
+
+    ```sh
+    ~] rpm --import RPM-GPG-KEY-Essence
+
+    ~] rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+    gpg-pubkey-f4a80eb5-53a7ff4b --> gpg(CentOS-7 Key (CentOS 7 Official Signing Key) <security@centos.org>)
+    gpg-pubkey-f426ace9-6206021b --> gpg(Essence, Inc. (Essence, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@essence.com.cn>)
+    ```
+
+* Products based on RPM use GPG signing keys. Run the following command to **verify** an RPM package:
+
+    ```sh
+    ~] rpm --checksig openssh-7.4p1-16.el7.x86_64.rpm   # --check 等价于 -K
+    openssh-7.4p1-16.el7.x86_64.rpm: rsa sha1 (md5) pgp md5 OK
+
+    # Or use:
+    ~] rpm -q --qf '%{SIGPGP:pgpsig}\n' -p openssh-7.4p1-16.el7.x86_64.rpm
+    RSA/SHA256, Wed 25 Apr 2018 07:32:50 PM CST, Key ID 24c6a8a7f4a80eb5
+
+    # To see a litter more information, use `-v` option
+    ~] rpm --checksig -v openssh-7.4p1-16.el7.x86_64.rpm
+    openssh-7.4p1-16.el7.x86_64.rpm:
+        Header V3 RSA/SHA256 Signature, key ID f4a80eb5: OK               # <= Signing Key ID
+        Header SHA1 digest: OK (807e6ff3b67ac16fae28f6881c98b6d2a5392794)
+        V3 RSA/SHA256 Signature, key ID f4a80eb5: OK                      # <= Signing Key ID
+        MD5 digest: OK (805b1fb17b3b7a41b2df9fd89b75e377)
+
+    # To see much more information, use `-vv` option
+    ~] rpm --checksig -vv openssh-7.4p1-16.el7.x86_64.rpm
+    ...
+    D:  read h#     357 Header SHA1 digest: OK (489efff35e604042709daf46fb78611fe90a75aa)   # 总共签名了4次
+    D: added key gpg-pubkey-f4a80eb5-53a7ff4b to keyring
+    D:  read h#     362 Header SHA1 digest: OK (743138e2ec43551793c2dda50ded34fe0a08ee7a)
+    D: added key gpg-pubkey-a8283b2f-6205f2f1 to keyring
+    D:  read h#     364 Header SHA1 digest: OK (f66c5b7a40ef3e1ed46fbf4575feab9e00ccd06c)
+    D: added key gpg-pubkey-80ca0fd4-6205f738 to keyring
+    D:  read h#     366 Header SHA1 digest: OK (5b273b3b11623ee3a4b7c5bb6261d5ddef9c93a9)
+    D: added key gpg-pubkey-1eab8f7a-6205faa7 to keyring
+    ...                             # 以下信息和 -v 一致
+    openssh-7.4p1-16.el7.x86_64.rpm:
+        Header V3 RSA/SHA256 Signature, key ID f4a80eb5: OK
+        Header SHA1 digest: OK (807e6ff3b67ac16fae28f6881c98b6d2a5392794)
+        V3 RSA/SHA256 Signature, key ID f4a80eb5: OK
+        MD5 digest: OK (805b1fb17b3b7a41b2df9fd89b75e377)
+    ...
+    ```
+
+    The output of this command shows whether the package is signed and which key signed it.
 
 
 
