@@ -164,13 +164,16 @@ The value of the `LDFLAGS` environment variable set by build systems is determin
 * Defining a Macro
 
     ```text
+    %global <name>[(opts)] <body>
     %define <name>[(opts)] <body>
     ```
 
     * All whitespace surrounding `<body>` is removed.
     * Name may be composed of alphanumeric(`0-9,a-z,A-Z`) characters, and the character "`_`" and must be **at least 3 characters** in length.
-    * A macro without an (opts) field is "simple" in that only recursive macro expansion is performed. A parameterized macro contains an (opts) field. "–" as opts disables all option processing, otherwise the opts (i.e. string between parentheses) are passed exactly as is to `getopt(3)` for argc/argv processing at the beginning of a macro invocation. 
-    * "–" can be used to separate options from arguments. While a parameterized macro is being expanded, the following shell-like macros are available:
+    * Inclusion of the (opts) field is optional:
+        * `Simple` macros do not contain the `(opts)` field. In this case, only recursive macro expansion is performed. 
+        * `Parametrized` macros contain the `(opts)` field. The `opts` string  is passed to `getopt(3)` for `argc/argv` processing at the beginning of a macro invocation.
+    * "`–`" can be used to separate options from arguments. While a parameterized macro is being expanded, the following shell-like macros are available:
 
         ```spec
         %0       the name of the macro being invoked

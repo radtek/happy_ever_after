@@ -390,7 +390,7 @@ bash-4.2.46-31.el7.x86_64
 
 ## 4. Signing Packages
 
-* 1.**Generate** a gpg
+* **Generate** a gpg
 
     ```sh
     ]$ gpg --gen-key
@@ -440,7 +440,7 @@ bash-4.2.46-31.el7.x86_64
 
 * **Export** the Public key and <sup>Optional</sup>secrect Key.  
 
-    > 注: 如果只是在本机上给rpm包签名, 无需导入公钥和私钥; 导出的公钥和私钥只是为了后续方便在其他服务器上使用
+    > **注:** 如果只是在本机上给rpm包签名, 无需导入公钥和私钥; 导出的公钥和私钥只是为了后续方便在其他服务器上使用
 
     * Public Key
     
@@ -451,7 +451,7 @@ bash-4.2.46-31.el7.x86_64
         gpg --list-public-keys
         
         # 导出
-        gpg -a "<Key-Name|Key-ID>" --export > RPM-GPG-KEY-<NAME>     # "-a"="--armor", 以ASCII而不是默认的二进制的形式输出; "-o"="--output" 
+        gpg -a "<Key-Name|Key-ID>" --export > RPM-GPG-KEY-<NAME>     # "-a"="--armor", 以ASCII而不是默认的二进制的形式输出; "-o"="--output", 指定写入的文件 
         gpg -a -o "<Output-File-Name>" --export "<Key-Name|Key-ID>"  # 只有一个gpg时, "<Key-Name|Key-ID>" 可省略不写
 
         # e.g.
@@ -466,10 +466,12 @@ bash-4.2.46-31.el7.x86_64
         gpg --list-secret-keys
         
         # 导出
-        gpg --export 
+        gpg -a -o "<Output-File-Name>" --export-secret-keys
         ```
 
 * **Import** the exported public key into `rpm` database as follows: 
+
+    > **注:** 如果只是在本机上给rpm包签名, 无需导入公钥和私钥; 导出的公钥和私钥只是为了后续方便在其他服务器上使用
 
     ```sh
     ~] rpm --import RPM-GPG-KEY-Essence
@@ -479,11 +481,42 @@ bash-4.2.46-31.el7.x86_64
     gpg-pubkey-f426ace9-6206021b --> gpg(Essence, Inc. (Essence, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@essence.com.cn>)
     ```
 
+* Edit the file `~/.rpmmacros` in order to **utilize** the key.
+
+    ```sh
+    ~]$ cat ~/.rpmmacros 
+
+    %_signature gpg
+    %_gpg_name Essence, Inc.
+
+    %_gpg_path /root/.gnupg
+    %_gpgbin /usr/bin/gpg2
+    %__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --batch --verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u "%{_gpg_name}" -sbo %{__signature_filename} --digest-algo sha256 %{__plaintext_filename}'
+    ```
+
+    > **注**: 经测试, 配置 `%_signature`和 `%_gpg_name` 两个宏即可正常进行签名; 查询红帽文档 [How to sign rpms with GPG](https://access.redhat.com/articles/3359321), 还提供了 `%_gpg_path`, `%_gpgbin`, `%__gpg_sign_cmd`三个宏设置, 可按情况配置
+
+    如果在签名时, 不想使用`~/.rpmmacros`配置中的 `%_gpg_name`, 可以在 `rpmbuild --define` 定义新的 `%_gpg_name` 以覆盖`~/.rpmmacros`文件的配置
+
+
+* **Sign** the rpm
+
+    ```sh
+    rpm --addsign bello-0.1-1.el7.noarch.rpm  # Add
+    rpm --resign bello-0.1-1.el7.noarch.rpm   # Replace (replace all signatures)
+
+    rpm --define "_gpg_name Essence, Inc." --addsign ./RPMS/noarch/bello-0.1-1.el7.noarch.rpm
+
+    rpm --addsign ?ello*.rpm
+    rpm --resign ?ello*.rpm
+    ```
+
+
 * Products based on RPM use GPG signing keys. Run the following command to **verify** an RPM package:
 
     ```sh
     ~] rpm --checksig openssh-7.4p1-16.el7.x86_64.rpm   # --check 等价于 -K
-    openssh-7.4p1-16.el7.x86_64.rpm: rsa sha1 (md5) pgp md5 OK
+    openssh-7.4p1-16.el7.x86_64.rpm: rsa sha1 (md5) pgp md5 OK  # rpm < 4.1 允许一个rpm有多个签名, 此时检查时出现几个pgp就证明有几个签名
 
     # Or use:
     ~] rpm -q --qf '%{SIGPGP:pgpsig}\n' -p openssh-7.4p1-16.el7.x86_64.rpm
@@ -500,7 +533,7 @@ bash-4.2.46-31.el7.x86_64
     # To see much more information, use `-vv` option
     ~] rpm --checksig -vv openssh-7.4p1-16.el7.x86_64.rpm
     ...
-    D:  read h#     357 Header SHA1 digest: OK (489efff35e604042709daf46fb78611fe90a75aa)   # 总共签名了4次
+    D:  read h#     357 Header SHA1 digest: OK (489efff35e604042709daf46fb78611fe90a75aa)   # 系统总共导入了4个gpg公钥
     D: added key gpg-pubkey-f4a80eb5-53a7ff4b to keyring
     D:  read h#     362 Header SHA1 digest: OK (743138e2ec43551793c2dda50ded34fe0a08ee7a)
     D: added key gpg-pubkey-a8283b2f-6205f2f1 to keyring
