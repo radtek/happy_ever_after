@@ -420,11 +420,11 @@ bash-4.2.46-31.el7.x86_64
     
     GnuPG needs to construct a user ID to identify your key.
     
-    Real name: Essencetest, Inc.                               # <= Essencetest, Inc.
+    Real name: companytest, Inc.                               # <= companytest, Inc.
     Email address: chenwen1@com.cn                         # <= chenwen1@com.cn
-    Comment: Essencetest, Inc. @ XiTongPingTaiShi Signing Keys # <= Essencetest, Inc. @ XiTongPingTaiShi Signing Keys
+    Comment: companytest, Inc. @ XiTongPingTaiShi Signing Keys # <= companytest, Inc. @ XiTongPingTaiShi Signing Keys
     You selected this USER-ID:
-        "Essencetest, Inc. (Essencetest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>"
+        "companytest, Inc. (companytest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>"
     
     Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O  # <= O
     You need a Passphrase to protect your secret key.      # <= password
@@ -434,7 +434,7 @@ bash-4.2.46-31.el7.x86_64
     ...                                                    # Information of new GPG.
     pub   2048R/F426ACE9 2022-02-11
         Key fingerprint = C823 C1F1 3C69 F688 73A1  9895 8E15 0099 F426 ACE9
-    uid                  Essencetest, Inc. (Essencetest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>
+    uid                  companytest, Inc. (companytest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>
     sub   2048R/1970529B 2022-02-11
     ```
 
@@ -455,7 +455,7 @@ bash-4.2.46-31.el7.x86_64
         gpg -a -o "<Output-File-Name>" --export "<Key-Name|Key-ID>"  # 只有一个gpg时, "<Key-Name|Key-ID>" 可省略不写
 
         # e.g.
-        gpg -a "Essencetest, Inc." --export > RPM-GPG-KEY-Essence
+        gpg -a "companytest, Inc." --export > RPM-GPG-KEY-Essence
         ```
 
     * Secrect Key
@@ -478,7 +478,7 @@ bash-4.2.46-31.el7.x86_64
 
     ~] rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
     gpg-pubkey-f4a80eb5-53a7ff4b --> gpg(CentOS-7 Key (CentOS 7 Official Signing Key) <security@centos.org>)
-    gpg-pubkey-f426ace9-6206021b --> gpg(Essencetest, Inc. (Essencetest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>)
+    gpg-pubkey-f426ace9-6206021b --> gpg(companytest, Inc. (companytest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>)
     ```
 
 * Edit the file `~/.rpmmacros` in order to **utilize** the key.
@@ -487,7 +487,7 @@ bash-4.2.46-31.el7.x86_64
     ~]$ cat ~/.rpmmacros 
 
     %_signature gpg
-    %_gpg_name Essencetest, Inc.
+    %_gpg_name companytest, Inc.
 
     %_gpg_path /root/.gnupg
     %_gpgbin /usr/bin/gpg2
@@ -505,7 +505,7 @@ bash-4.2.46-31.el7.x86_64
     rpm --addsign bello-0.1-1.el7.noarch.rpm  # Add
     rpm --resign bello-0.1-1.el7.noarch.rpm   # Replace (replace all signatures)
 
-    rpm --define "_gpg_name Essencetest, Inc." --addsign ./RPMS/noarch/bello-0.1-1.el7.noarch.rpm
+    rpm --define "_gpg_name companytest, Inc." --addsign ./RPMS/noarch/bello-0.1-1.el7.noarch.rpm
 
     rpm --addsign ?ello*.rpm
     rpm --resign ?ello*.rpm
