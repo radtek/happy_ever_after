@@ -1,4 +1,4 @@
-# RPM打包 -- openssh为例
+# RPM打包
 
 ## 1. RPM打包工作目录
 
@@ -421,7 +421,7 @@ bash-4.2.46-31.el7.x86_64
     GnuPG needs to construct a user ID to identify your key.
     
     Real name: companytest, Inc.                               # <= companytest, Inc.
-    Email address: chenwen1@com.cn                         # <= chenwen1@com.cn
+    Email address: chenwen1@com.cn                             # <= chenwen1@com.cn
     Comment: companytest, Inc. @ XiTongPingTaiShi Signing Keys # <= companytest, Inc. @ XiTongPingTaiShi Signing Keys
     You selected this USER-ID:
         "companytest, Inc. (companytest, Inc. @ XiTongPingTaiShi Signing Keys) <chenwen1@com.cn>"
