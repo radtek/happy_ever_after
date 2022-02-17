@@ -365,6 +365,12 @@ bash-4.2.46-31.el7.x86_64
 
     使用 `rpmlint`, 可以对 `.rpm`, `.srpm`包和`.spec`文件进行完整性检查, 加上 `-i` 选项可显示错误简介
 
+    When checking binary RPMs, `rpmlint` checks for the following items:
+
+    * Documentation
+    * Manual pages
+    * Consistent use of the Filesystem Hierarchy Standard
+
     `rpmlint` 判断比较严格, 根据实际情况可以忽略掉一些提示错误
 
     ```sh
@@ -551,6 +557,11 @@ bash-4.2.46-31.el7.x86_64
     ```
 
     The output of this command shows whether the package is signed and which key signed it.
+
+
+## 5. Advancd Topics
+
+
 
 
 
