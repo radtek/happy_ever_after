@@ -67,13 +67,13 @@ SPEC文件主体由两部分组成: Preamble + Body
 | -- | :-- |
 | `Name` | The base name of the package, **which should match the SPEC file name**.  |
 | `Version` | The upstream version number of the software.  |
-| `Release` | The number of times this version of the software was released. <br>Normally, set the initial value to 1%{?dist}, and increment it with each new release of the package.  Reset to 1 when a new Version of the software is built. |
+| `Release` | The number of times this version of the software was released. <br>Normally, set the initial value to `1%{?dist}`, and increment it with each new release of the package.  Reset to 1 when a new Version of the software is built. |
 | `Summary` | A brief, one-line summary of the package. |
 | `License` | The license of the software being packaged. GPLv2, GPLv3, BSD... |
 | `URL`     | The full URL for more information about the program. Most often this is the upstream project website for the software being packaged. |
 | `Source0` | Path or URL to the compressed archive of the upstream source code (unpatched, patches are handled elsewhere). <br>This should point to an accessible and reliable storage of the archive, for example, the upstream page and not the packager’s local storage. <br>If needed, more SourceX directives can be added, incrementing the number each time, for example: Source1, Source2, Source3, and so on. |
 | `Patch` | The name of the first patch to apply to the source code if necessary. <br><br>The directive can be applied in two ways: with or without numbers at the end of Patch. <br><br>If no number is given, one is assigned to the entry internally. It is also possible to give the numbers explicitly using Patch0, Patch1, Patch2, Patch3, and so on. <br><br>These patches can be applied one by one using the `%patch0`, `%patch1`, `%patch2` macro and so on. <br>The macros are applied within the `%prep` directive in the *Body* section of the RPM SPEC file. <br>Alternatively, you can use the `%autopatch` macro which automatically applies all patches in the order they are given in the SPEC file. |
-| `BuildArch` | If the package is not architecture dependent, for example, if written entirely in an interpreted programming language, set this to `BuildArch: noarch`. <br>If not set, the package automatically inherits(继承) the Architecture of the machine on which it is built, for example `x86_64`.
+| `BuildArch` | If the package is not architecture dependent, for example, if written entirely in an interpreted programming language, set this to `BuildArch: noarch`. <br>If not set, the package automatically inherits<sup>继承</sup> the Architecture of the machine on which it is built, for example `x86_64`.
 | `BuildRequires` | A comma(,) or whitespace-separated list of packages required for building the program written in a compiled language. <br>There can be multiple entries of `BuildRequires`, **each on its own line** in the SPEC file. |
 | `Requires` | A comma-(,) or whitespace-separated list of packages required by the software to run once installed. <br>There can be multiple entries of `Requires`, **each on its own line** in the SPEC file. <br> Use "<=" and ">=", e.g.: `libxxx-devel >= 1.1.1`  |
 | `ExcludeArch` | If a piece of software can not operate on a specific processor architecture, you can exclude that architecture here. |
@@ -101,8 +101,8 @@ bash-4.2.46-31.el7.x86_64
 | -- | :-- |
 | `%description` | A full description of the software packaged in the RPM. This description can span multiple lines and can be broken into paragraphs. |
 | `%prep` | Command or series of commands to prepare the software to be built, for example, unpacking the archive in `Source0`. <br>This directive can contain a **shell script**. |
-| `%build` | Command or series of commands for building the software into **machine code** (for compiled languages) or **byte code** (for some interpreted languages). <br>configure, make |
-| `%install` | Command or series of commands for copying the desired build artifacts from the `%builddir` (*where the build happens*) to the `%buildroot` directory (*which contains the directory structure with the files to be packaged*). <br>This usually means copying files from `~/rpmbuild/BUILD` to `~/rpmbuild/BUILDROOT` and creating the necessary directories in `~/rpmbuild/BUILDROOT`. <br>This is only run when creating a package, not when the end-user installs the package. <br>make install |
+| `%build` | Command or series of commands for building the software into **machine code** (for compiled languages) or **byte code** (for some interpreted languages). <br>`configure` + `make` |
+| `%install` | Command or series of commands for copying the desired build artifacts from the `%builddir` (*where the build happens*) to the `%buildroot` directory (*which contains the directory structure with the files to be packaged*). <br>This usually means copying files from `~/rpmbuild/BUILD` to `~/rpmbuild/BUILDROOT` and creating the necessary directories in `~/rpmbuild/BUILDROOT`. <br>This is only run when creating a package, not when the end-user installs the package. <br>`make install` |
 | `%check` | Command or series of commands to test the software. This normally includes things such as unit tests. |
 | `%files` | The list of files that will be installed in the end user’s system. |
 | `%changelog` | A record of changes that have happened to the package between different `Version` or `Release` builds. |
@@ -110,14 +110,136 @@ bash-4.2.46-31.el7.x86_64
 
 * Scriptlet
 
-| Directive | Definition |
-| -- | :-- |
-| `%pre` | Scriptlet that is executed just before installing the package on the target system. |
-| `%post` | Scriptlet that is executed just after the package was installed on the target system. |
-| `%preun` | Scriptlet that is executed just before uninstalling the package from the target system. |
-| `%postun` | Scriptlet that is executed just after the package was uninstalled from the target system. |
-| `%pretrans` | Scriptlet that is executed just before installing or removing *any package*. |
-| `%posttrans` | Scriptlet that is executed at the end of the transaction. |
+    | Directive | Definition |
+    | -- | :-- |
+    | `%pre` | Scriptlet that is executed just before installing the package on the target system. |
+    | `%post` | Scriptlet that is executed just after the package was installed on the target system. |
+    | `%preun` | Scriptlet that is executed just before uninstalling the package from the target system. |
+    | `%postun` | Scriptlet that is executed just after the package was uninstalled from the target system. |
+    | `%pretrans` | Scriptlet that is executed just before installing or removing *any package*. |
+    | `%posttrans` | Scriptlet that is executed at the end of the transaction. |
+
+
+    查看 rpm 包的 Sriptlet：
+
+    * 查看已经在系统中安装的rpm包
+    
+        ```sh
+        ~] rpm -q --scripts openssh-server
+
+        preinstall scriptlet (using /bin/sh):
+        getent group sshd >/dev/null || groupadd -g 74 -r sshd || :
+        getent passwd sshd >/dev/null || \
+        useradd -c "Privilege-separated SSH" -u 74 -g sshd \
+        -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
+        postinstall scriptlet (using /bin/sh):
+
+        if [ $1 -eq 1 ] ; then 
+                # Initial installation 
+                systemctl preset sshd.service sshd.socket >/dev/null 2>&1 || : 
+        fi
+        preuninstall scriptlet (using /bin/sh):
+
+        if [ $1 -eq 0 ] ; then 
+                # Package removal, not upgrade 
+                systemctl --no-reload disable sshd.service sshd.socket > /dev/null 2>&1 || : 
+                systemctl stop sshd.service sshd.socket > /dev/null 2>&1 || : 
+        fi
+        postuninstall scriptlet (using /bin/sh):
+
+        systemctl daemon-reload >/dev/null 2>&1 || : 
+        if [ $1 -ge 1 ] ; then 
+                # Package upgrade, not uninstall 
+                systemctl try-restart sshd.service >/dev/null 2>&1 || : 
+        fi
+        ```
+
+    * 查看未安装的rpm(需要本地有rpm文件)
+
+        ```sh
+        ~] rpm -q --scripts -p pello-0.1.1-1.el7.noarch.rpm 
+        postinstall scriptlet (using /bin/sh):
+        echo "hello WengerChan"
+        postuninstall scriptlet (using /usr/bin/python2):
+        python2 -c "print 'Uninstalled. Goodbye'"
+        ```
+
+
+    说明：
+
+    1. `preinstall`, `postinstall`, `preuninstall`, `postuninstall`分别对应 `%pre`,`%post`,`%preun`,`%postun`
+
+    2. "`(using /bin/sh)`": 表示后续脚本的解释器使用 /bin/sh 执行脚本，这是默认值。也可以使用 `-p` 指定解释器, 如pello这个rpm包中使用的是 `%postun -p /usr/bin/python2`，输出解释器为 `/usr/bin/python2`
+
+        ```sh
+        postuninstall scriptlet (using /usr/bin/python2):
+        ```
+
+    3. To turn off the execution of scriptlet： `rpm --noscripts`, `--nopre`, `--nopost`, `--nopreun`, `--nopostun`, `--nopretrans`, `--noposttrans`
+
+    4. Scriptlet Macros(e.g. `systemd`)
+
+        ```sh
+        ]$ rpm --showrc | grep systemd
+        -14: __transaction_systemd_inhibit      %{__plugindir}/systemd_inhibit.so
+        -14: _journalcatalogdir /usr/lib/systemd/catalog
+        -14: _presetdir /usr/lib/systemd/system-preset
+        -14: _unitdir   /usr/lib/systemd/system
+        -14: _userunitdir       /usr/lib/systemd/user
+        ...
+        -14: systemd_post
+        -14: systemd_postun
+        -14: systemd_postun_with_restart
+        -14: systemd_preun
+        -14: systemd_requires
+        ...
+        -14: systemd_user_post  %{expand:%systemd_post \--global %%{?*}}
+        -14: systemd_user_postun        %{nil}
+        -14: systemd_user_postun_with_restart   %{nil}
+        -14: systemd_user_preun
+        ...
+        ```
+
+        ```sh
+        ~]$ rpm --eval %{systemd_post}
+
+        if [ $1 -eq 1 ] ; then 
+                # Initial installation 
+                systemctl preset  >/dev/null 2>&1 || : 
+        fi 
+
+
+        ~]$ rpm --eval %{systemd_postun}
+
+        systemctl daemon-reload >/dev/null 2>&1 || : 
+
+
+        ~]$ rpm --eval %{systemd_preun}
+
+        if [ $1 -eq 0 ] ; then 
+                # Package removal, not upgrade 
+                systemctl --no-reload disable  > /dev/null 2>&1 || : 
+                systemctl stop  > /dev/null 2>&1 || : 
+        fi 
+
+
+        ~]$ rpm --eval %{systemd_postun_with_restart}
+
+        systemctl daemon-reload >/dev/null 2>&1 || : 
+        if [ $1 -ge 1 ] ; then 
+                # Package upgrade, not uninstall 
+                systemctl try-restart  >/dev/null 2>&1 || : 
+        fi 
+        ```
+
+
+* Trigger
+
+
+
+
+* Epoch
+
 
 * Macros
 
