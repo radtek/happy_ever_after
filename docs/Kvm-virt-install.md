@@ -14,7 +14,7 @@ Create a new virtual machine from specified install media.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --version             show program's version number and exit
+  --version             show program''s version number and exit 
   --connect URI         Connect to hypervisor with libvirt URI
 
 General Options:
@@ -40,7 +40,7 @@ Installation Method Options:
                         Distro install URL, eg. https://host/path. See man
                         page for specific distro examples.
   --pxe                 Boot from the network using the PXE protocol
-  --import              Build guest around an existing disk image
+  --import              Build guest around an existing disk image 在已有的磁盘镜像中构建客户机
   -x EXTRA_ARGS, --extra-args EXTRA_ARGS
                         Additional arguments to pass to the install kernel
                         booted from --location
@@ -242,3 +242,4 @@ See man page for examples and full option syntax.
               --disk /home/user/VMs/my-debian9.img \
               --os-variant debian9
     ```
+
