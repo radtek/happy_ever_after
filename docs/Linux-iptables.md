@@ -186,6 +186,7 @@ iptables -A INPUT -s 10.150.36.71,10.150.36.72,10.150.36.120,10.150.36.122,10.15
 -A INPUT -p tcp -m multiport --dports 48668,58625,58725,58925,58930,10020,60020:60030 -j ACCEPT
 -A INPUT -p udp -m multiport --dports 10020,10030,60020:60030 -j ACCEPT
 ```
+
 ```
 /etc/hosts.allow
 
@@ -197,13 +198,18 @@ iptables -A INPUT -s 10.150.36.71,10.150.36.72,10.150.36.120,10.150.36.122,10.15
     sshd:all:deny
 ```
 
-#### (8) nfs ???
+#### (8) nfs
 
 ```bash
 firewall-cmd --add-service=nfs --permanent
 firewall-cmd --add-service=mountd --permanent 
 firewall-cmd --add-service=rpc-bind --permanent
 firewall-cmd --reload
+
+
+-A INPUT -p tcp -m multiport --dports 111,2049,20048 -j ACCEPT
+-A INPUT -p udp -m multiport --dports 111,2049,20048 -j ACCEPT
+
 ```
 
 #### (9) ???
