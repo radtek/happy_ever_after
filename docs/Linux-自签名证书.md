@@ -1,4 +1,7 @@
-# 自签名证书
+# CA, 证书
+
+* 搭建CA, 通过CA签署证书
+* 自签名证书
 
 步骤:
 
@@ -421,5 +424,19 @@ www.poftut.com
 *.poftut.com
 ```
 
+## 2 自签名证书
 
+server:
 
+```sh
+openssl genrsa -out /var/lib/yum/server.key 2048
+openssl req -new -x509 -text -key /var/lib/yum/server.key -out /var/lib/yum/server.cert
+chmod 600 /var/lib/yum/server.key
+```
+
+client:
+
+```sh
+cp server.cert /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+```
