@@ -612,7 +612,7 @@ node01: Starting Cluster (pacemaker)...
 # systemctl start pacemaker.service
 
 $ systemctl enable corosync.service
-$ systemctl enable pacemaker.servic
+$ systemctl enable pacemaker.service
 ```
 
 ##### 验证corosync配置
@@ -699,7 +699,7 @@ Cluster Properties:
 $ pcs resource standards
 ocf                         # Open cluster Framework
 lsb                         # Linux standard base (legacy init scripts)
-service                     #  Based on Linux "service" command
+service                     # Based on Linux "service" command
 systemd                     # systemd based service Management
 stonith                     # Fencing Resource standard (本机测试没有改选项，不知道是不是VM的原因)
 		
