@@ -214,10 +214,11 @@ rhel79-nginx-02                  fcd396e5-799e-4b51-aac7-fd76e8469a33 on
 # 测试on,off,reboot,status等操作
 fence_xvm -o off -H rhel79-nginx-01
 fence_xvm -o off -H rhel79-nginx-02
+```
 
 节点上验证：
 
-​```sh
+```sh
  fence_xvm -H rhel79-nginx-01 -d -o reboot
 ```
 
